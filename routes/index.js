@@ -1,6 +1,20 @@
 const express = require("express"),
+    passport = require("passport"),
     router = express.Router();
 const pool = require("../pool");
+
+////////// GOOGLE LOGIN //////////
+router.get("/login/google", passport.authenticate("google", {
+    scope: ["profile"]
+}));
+
+////////// GOOGLE AUTHENTICATION //////////
+router.get("/oauth2/redirect/google", passport.authenticate("google", {
+    failureRedirect: "/login/google"
+}, (req, res) => {
+    res.send("it worked");
+}))
+
 ////////// CREATE USER //////////
 router.post("/register", (req, res) => {
     let sql = `
