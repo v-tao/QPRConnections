@@ -1,6 +1,16 @@
 const express = require("express"),
     router = express.Router();
 const pool = require("../pool");
+
+////////// GET USERS //////////
+router.get("/", (req, res) => {
+    let sql = `
+    SELECT * FROM users 
+    WHERE
+    gender IN ${req.user.interstedGenders}
+    `
+})
+
 ////////// GET USER //////////
 router.get("/:id", (req, res) => {
     let sql = `SELECT * FROM users WHERE id=${req.params.id}`
@@ -10,6 +20,7 @@ router.get("/:id", (req, res) => {
     });
 })
 
+////////// UPDATE USER //////////
 router.put("/:id", (req, res) => {
     let sql = `
     UPDATE users
