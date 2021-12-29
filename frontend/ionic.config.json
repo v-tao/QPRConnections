@@ -1,0 +1,7 @@
+{
+  "name": "QPRConnections",
+  "integrations": {
+    "capacitor": {}
+  },
+  "type": "react"
+}
