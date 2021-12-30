@@ -35,16 +35,21 @@ passport.use(new GoogleStrategy({
     clientSecret: process.env.GOOGLE_CLIENT_SECRET,
     callbackURL: "http://localhost:3000/oauth2/redirect/google"
 }, (issuer, profile, cb) => {
-    let sql = `SELECT * FROM credentials WHERE provider="${issuer}" AND subject=${profile.id}`;
-    pool.query(sql, (err, result) => {
+    let sql = `SELECT * FROM credentials WHERE provider=? AND subject=?`;
+    pool.query(sql, [issuer, profile.id], (err, result) => {
         if (err) throw err;
         if (result.length==0) {
-            let sql = `INSERT INTO users (name) VALUES("${profile.displayName}")`;
-            pool.query(sql, (err, result) => {
+            let sql = `INSERT INTO users (name) VALUES(?)`;
+            pool.query(sql, [profile.displayName], (err, result) => {
                 let id = result.insertId
                 if (err) throw err;
-                let sql = `INSERT INTO credentials (userId, provider, subject) VALUES(${id}, "${issuer}", ${profile.id.toString()})`;
-                pool.query(sql, (err, result) => {
+                let sql = `INSERT INTO credentials SET ?`;
+                let credential = {
+                    userId: id,
+                    provider: issuer,
+                    subject: profile.id.toString()
+                }
+                pool.query(sql, credential, (err, result) => {
                     if(err) throw err;
                     let user = {
                         id: id,
@@ -54,8 +59,8 @@ passport.use(new GoogleStrategy({
                 })
             });
         } else {
-            let sql = `SELECT * FROM users WHERE id=${result[0].userId}`
-            pool.query(sql, (err, user) => {
+            let sql = `SELECT * FROM users WHERE id=?`
+            pool.query(sql, [result[0].userId], (err, user) => {
                 if (err) throw err;
                 if (!user[0]) return cb(null, false);
                 return cb(null, user[0]);
