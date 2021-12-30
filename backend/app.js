@@ -53,6 +53,13 @@ passport.use(new GoogleStrategy({
                     return cb(null, user);
                 })
             });
+        } else {
+            let sql = `SELECT * FROM users WHERE id=${result[0].userId}`
+            pool.query(sql, (err, user) => {
+                if (err) throw err;
+                if (!user[0]) return cb(null, false);
+                return cb(null, user[0]);
+            })
         }
     })
 }));
