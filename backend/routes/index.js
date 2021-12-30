@@ -8,12 +8,16 @@ router.get("/login/google", passport.authenticate("google", {
     scope: ["profile"]
 }));
 
+router.get("/test", (req, res) => {
+    res.send("poggers?");
+})
+
 ////////// GOOGLE AUTHENTICATION //////////
-router.get("/oauth2/redirect/google", passport.authenticate("google", {
-    failureRedirect: "/login/google"
-}, (req, res) => {
-    res.send("it worked");
-}))
+router.get('/oauth2/redirect/google',
+  passport.authenticate('google', { failureRedirect: '/', failureMessage: true }),
+  (req, res) => {
+    res.redirect("/test")
+  });
 
 ////////// CREATE USER //////////
 router.post("/register", (req, res) => {
