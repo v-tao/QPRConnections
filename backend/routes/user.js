@@ -44,17 +44,20 @@ router.put("/:id", (req, res) => {
         req.body.about,
         req.body.okActions,
         req.body.notOkActions,
+        req.params.id,
         req.params.id
     ]
     pool.query(sql, queryValues, (err, result) => {
         if (err) throw err;
-        res.send("Account successfully updated.");
+        res.redirect(`/users/${req.params.id}`);
     })
 });
 
 router.delete("/:id/delete", (req, res) => {
-    let sql = `DELETE FROM users WHERE id=?`;
-    pool.query(sql, [req.params.id], (err, result) => {
+    let sql = `
+    DELETE FROM users WHERE id=?;
+    DELETE FROM credentials WHERE userId=?`;
+    pool.query(sql, [req.params.id, req.params.id], (err, result) => {
         if (err) throw err;
         res.send("Account succesfully deleted.");
     })

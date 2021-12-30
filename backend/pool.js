@@ -4,7 +4,8 @@ const pool = mysql.createPool({
     host: "localhost",
     user: "root",
     password: process.env.MYSQL_PASSWORD,
-    database: "QPRConnections"
+    database: "QPRConnections",
+    multipleStatements: true,
 });
 
 module.exports = pool;
