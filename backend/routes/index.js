@@ -13,22 +13,16 @@ router.get("/test", (req, res) => {
 })
 
 ////////// GOOGLE AUTHENTICATION //////////
-router.get('/oauth2/redirect/google',
-  passport.authenticate('google', { failureRedirect: '/', failureMessage: true }),
+router.get("/oauth2/redirect/google",
+  passport.authenticate("google", { failureRedirect: "/", failureMessage: true }),
   (req, res) => {
     res.redirect("/test")
   });
 
-////////// CREATE USER //////////
-// router.post("/register", (req, res) => {
-//     let sql = `
-//     INSERT INTO users 
-//     (\`name\`, gender, interestedGenders, birthday, location, distance, about, okActions, notOkActions) 
-//     VALUES("${req.body.name}", "${req.body.gender}", "${req.body.interestedGenders}", DATE("${req.body.birthday}"), POINT(${req.body.location[0]}, ${req.body.location[1]}), ${req.body.distance}, "${req.body.about}", "${req.body.okActions}", "${req.body.notOkActions}")`;
-//     pool.query(sql, (err, result) => {
-//         if(err) throw err;
-//         res.send("Account successfully created.")
-//     })
-// });
+////////// LOGOUT //////////
+router.post("/logout", (req, res) => {
+  req.logout();
+  res.send("User successfully logged out.");
+})
 
 module.exports = router;
