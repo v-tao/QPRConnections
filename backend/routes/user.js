@@ -1,15 +1,17 @@
 const express = require("express"),
     router = express.Router();
 const pool = require("../pool");
+const {isLoggedIn, isAuthorized} = require("../middleware/index");
 
+router.use(isLoggedIn);
 ////////// GET USERS //////////
-router.get("/", (req, res) => {
-    let sql = `
-    SELECT * FROM users 
-    WHERE
-    gender IN ${req.user.interstedGenders}
-    `
-})
+// router.get("/", (req, res) => {
+//     let sql = `
+//     SELECT * FROM users 
+//     WHERE
+//     gender IN ${req.user.interstedGenders}
+//     `
+// })
 
 ////////// GET USER //////////
 router.get("/:id", (req, res) => {
@@ -21,7 +23,7 @@ router.get("/:id", (req, res) => {
 })
 
 ////////// UPDATE USER //////////
-router.put("/:id", (req, res) => {
+router.put("/:id", isAuthorized, (req, res) => {
     let sql = `
     UPDATE users
     SET
@@ -53,7 +55,7 @@ router.put("/:id", (req, res) => {
     })
 });
 
-router.delete("/:id/delete", (req, res) => {
+router.get("/:id/delete", isAuthorized, (req, res) => {
     let sql = `
     DELETE FROM users WHERE id=?;
     DELETE FROM credentials WHERE userId=?`;

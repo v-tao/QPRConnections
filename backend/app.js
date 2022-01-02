@@ -5,7 +5,7 @@ const express = require("express"),
 const indexRoutes = require("./routes/index"),
     userRoutes = require("./routes/user");
 const app = express();
-const pool = require("./pool.js");
+const pool = require("./pool");
 const { createPoolCluster } = require("mysql");
 require("dotenv").config();
 app.use(express.json());
