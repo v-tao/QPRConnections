@@ -55,7 +55,7 @@ router.put("/:id", isAuthorized, (req, res) => {
     })
 });
 
-router.get("/:id/delete", isAuthorized, (req, res) => {
+router.delete("/:id/delete", isAuthorized, (req, res) => {
     let sql = `
     DELETE FROM users WHERE id=?;
     DELETE FROM credentials WHERE userId=?`;
