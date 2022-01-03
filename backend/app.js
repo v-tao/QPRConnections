@@ -3,7 +3,9 @@ const express = require("express"),
     passport = require("passport"),
     GoogleStrategy = require("passport-google-oidc");
 const indexRoutes = require("./routes/index"),
-    userRoutes = require("./routes/user");
+    userRoutes = require("./routes/user"),
+    requestRoutes = require("./routes/request");
+    
 const app = express();
 const pool = require("./pool");
 const { createPoolCluster } = require("mysql");
@@ -72,6 +74,7 @@ passport.use(new GoogleStrategy({
 ////////// ROUTES //////////
 app.use("/", indexRoutes);
 app.use("/users", userRoutes);
+app.use("/requests", requestRoutes);
 
 app.listen(3000, function () {
     console.log("Server Started");
