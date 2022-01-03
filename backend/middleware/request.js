@@ -5,7 +5,7 @@ const sentRequest = (req, res, next) => {
     let sql = `SELECT user_id FROM user_request WHERE id=?`;
     pool.query(sql, [req.params.id], (err, sentUser) => {
         if (err) throw err;
-        if (sentUser != req.user[0].id) {
+        if (sentUser[0].user_id != req.user[0].id) {
             res.send("You do not have permission to do that.");
         } else {
             next();

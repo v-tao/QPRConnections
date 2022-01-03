@@ -3,11 +3,11 @@ const express = require("express"),
 
 const pool = require("../pool");
 const {isLoggedIn, isAuthenticated} = require("../middleware/index");
-const {setnRequest, receivedRequest} = require("../middleware/request");
+const {sentRequest, receivedRequest} = require("../middleware/request");
 
 router.use(isLoggedIn);
 
-////////// REQUESTS SENT //////////
+////////// GET REQUESTS SENT //////////
 router.get("/sent", (req, res) => {
     let sql = `
     SELECT * FROM user LEFT JOIN user_request 
@@ -20,7 +20,7 @@ router.get("/sent", (req, res) => {
     });
 });
   
-////////// REQUESTS RECEIVED //////////
+////////// GET REQUESTS RECEIVED //////////
 router.get("/received", (req, res) => {
     // return the requests that have not already been rejected
     let sql = `
@@ -31,6 +31,15 @@ router.get("/received", (req, res) => {
     pool.query(sql, [req.user[0].id], (err, receivedRequests) => {
         if (err) throw err;
         res.json(receivedRequests);
+    });
+});
+
+////////// DELETE REQUEST //////////
+router.delete("/:id/delete", sentRequest, (req, res) => {
+    let sql = `DELETE FROM user_request WHERE id=?`
+    pool.query(sql, [req.params.id], (err, request) => {
+        if (err) throw err;
+        res.send("Request successfully deleted.");
     });
 });
 
@@ -58,6 +67,6 @@ router.post("/:id/reject", receivedRequest, (req, res) => {
         if (err) throw err;
         res.send("Request successfully rejected.");
     });
-})
+});
 
 module.exports = router;
