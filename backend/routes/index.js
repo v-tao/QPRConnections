@@ -26,6 +26,19 @@ router.post("/logout", (req, res) => {
   res.send("User successfully logged out.");
 })
 
+////////// REQUESTS SENT //////////
+router.get("/sent", (req, res) => {
+  let sql = `
+  SELECT * FROM user LEFT JOIN user_request 
+  ON user.id=user_request.requested_user_id 
+  WHERE user_request.user_id=?
+  `
+  pool.query(sql, [req.user[0].id], (err, sentRequests) => {
+    if(err) throw (err);
+    res.json(sentRequests);
+  })
+})
+
 
 router.get("/my")
 module.exports = router;
