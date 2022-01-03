@@ -2,6 +2,7 @@ const express = require("express"),
     passport = require("passport"),
     router = express.Router();
 const pool = require("../pool");
+const {isLoggedIn, isAuthenticated} = require("../middleware/index.js");
 
 ////////// TEST //////////
 router.get("/test", (req, res) => {
@@ -27,18 +28,30 @@ router.post("/logout", (req, res) => {
 })
 
 ////////// REQUESTS SENT //////////
-router.get("/sent", (req, res) => {
+router.get("/sent", isLoggedIn, (req, res) => {
   let sql = `
   SELECT * FROM user LEFT JOIN user_request 
   ON user.id=user_request.requested_user_id 
   WHERE user_request.user_id=?
   `
   pool.query(sql, [req.user[0].id], (err, sentRequests) => {
-    if(err) throw (err);
+    if(err) throw err;
     res.json(sentRequests);
+  });
+});
+
+////////// REQUESTS RECEIVED //////////
+router.get("/received", isLoggedIn, (req, res) => {
+  let sql = `
+  SELECT * FROM user LEFT JOIN user_request
+  ON user.id=user_request.user_id
+  WHERE user_request.requested_user_id=?
+  `
+  pool.query(sql, [req.user[0].id], (err, receivedRequests) => {
+    if (err) throw err;
+    res.json(receivedRequests);
   })
 })
-
 
 router.get("/my")
 module.exports = router;
