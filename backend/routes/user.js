@@ -4,22 +4,23 @@ const pool = require("../pool");
 const {isLoggedIn, isAuthorized} = require("../middleware/index");
 
 router.use(isLoggedIn);
-////////// GET USERS //////////
-// router.get("/", (req, res) => {
-//     let sql = `
-//     SELECT * FROM users 
-//     WHERE
-//     gender IN ${req.user.interstedGenders}
-//     `
-// })
 
 ////////// GET USER //////////
 router.get("/:id", (req, res) => {
     let sql = `SELECT * FROM user WHERE id=?`
-    pool.query(sql, [req.params.id], (err, result) => {
+    pool.query(sql, [req.params.id], (err, user) => {
         if(err) throw err;
-        res.json(result);
+        res.json(user);
     });
+})
+
+////////// REQUEST USER //////////
+router.post("/:id/request", (req, res) => {
+    let sql = `INSERT INTO user_request (user_id, requested_user_id) VALUES(?, ?)`
+    pool.query(sql, [req.user[0].id, req.params.id], (err, user) => {
+        if (err) throw err;
+        res.send("Request successfully sent.");
+    })
 })
 
 ////////// UPDATE USER //////////
@@ -49,17 +50,18 @@ router.put("/:id", isAuthorized, (req, res) => {
         req.params.id,
         req.params.id
     ]
-    pool.query(sql, queryValues, (err, result) => {
+    pool.query(sql, queryValues, (err, user) => {
         if (err) throw err;
         res.redirect(`/users/${req.params.id}`);
     })
 });
 
+////////// DELETE USER //////////
 router.delete("/:id/delete", isAuthorized, (req, res) => {
     let sql = `
     DELETE FROM user WHERE id=?;
     DELETE FROM credential WHERE user_id=?`;
-    pool.query(sql, [req.params.id, req.params.id], (err, result) => {
+    pool.query(sql, [req.params.id, req.params.id], (err, user) => {
         if (err) throw err;
         res.send("Account succesfully deleted.");
     })
