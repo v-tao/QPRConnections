@@ -3,14 +3,15 @@ const express = require("express"),
     router = express.Router();
 const pool = require("../pool");
 
+////////// TEST //////////
+router.get("/test", (req, res) => {
+  res.send("poggers?");
+})
+
 ////////// GOOGLE LOGIN //////////
 router.get("/login/google", passport.authenticate("google", {
     scope: ["profile"]
 }));
-
-router.get("/test", (req, res) => {
-    res.send("poggers?");
-})
 
 ////////// GOOGLE AUTHENTICATION //////////
 router.get("/oauth2/redirect/google",
@@ -25,4 +26,6 @@ router.post("/logout", (req, res) => {
   res.send("User successfully logged out.");
 })
 
+
+router.get("/my")
 module.exports = router;

@@ -15,7 +15,7 @@ router.use(isLoggedIn);
 
 ////////// GET USER //////////
 router.get("/:id", (req, res) => {
-    let sql = `SELECT * FROM users WHERE id=?`
+    let sql = `SELECT * FROM user WHERE id=?`
     pool.query(sql, [req.params.id], (err, result) => {
         if(err) throw err;
         res.json(result);
@@ -25,9 +25,9 @@ router.get("/:id", (req, res) => {
 ////////// UPDATE USER //////////
 router.put("/:id", isAuthorized, (req, res) => {
     let sql = `
-    UPDATE users
+    UPDATE user
     SET
-    \`name\`=?,
+    user_name=?,
     gender=?,
     interestedGenders=?,
     location=POINT(?, ?),
@@ -57,8 +57,8 @@ router.put("/:id", isAuthorized, (req, res) => {
 
 router.delete("/:id/delete", isAuthorized, (req, res) => {
     let sql = `
-    DELETE FROM users WHERE id=?;
-    DELETE FROM credentials WHERE userId=?`;
+    DELETE FROM user WHERE id=?;
+    DELETE FROM credential WHERE user_id=?`;
     pool.query(sql, [req.params.id, req.params.id], (err, result) => {
         if (err) throw err;
         res.send("Account succesfully deleted.");

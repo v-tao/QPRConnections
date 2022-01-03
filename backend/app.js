@@ -24,7 +24,7 @@ passport.serializeUser((user, done) => {
   });
   
 passport.deserializeUser((id, done) => {
-    let sql = `SELECT * FROM users WHERE id=${id}`;
+    let sql = `SELECT * FROM user WHERE id=${id}`;
     pool.query(sql, (err, user) => {
         done(err, user);
     });
@@ -35,17 +35,17 @@ passport.use(new GoogleStrategy({
     clientSecret: process.env.GOOGLE_CLIENT_SECRET,
     callbackURL: "http://localhost:3000/oauth2/redirect/google"
 }, (issuer, profile, cb) => {
-    let sql = `SELECT * FROM credentials WHERE provider=? AND subject=?`;
+    let sql = `SELECT * FROM credential WHERE provider=? AND subject=?`;
     pool.query(sql, [issuer, profile.id], (err, result) => {
         if (err) throw err;
         if (result.length==0) {
-            let sql = `INSERT INTO users (name) VALUES(?)`;
+            let sql = `INSERT INTO user (user_name) VALUES(?)`;
             pool.query(sql, [profile.displayName], (err, result) => {
                 let id = result.insertId
                 if (err) throw err;
-                let sql = `INSERT INTO credentials SET ?`;
+                let sql = `INSERT INTO credential SET ?`;
                 let credential = {
-                    userId: id,
+                    user_id: id,
                     provider: issuer,
                     subject: profile.id.toString()
                 }
@@ -53,14 +53,14 @@ passport.use(new GoogleStrategy({
                     if(err) throw err;
                     let user = {
                         id: id,
-                        name: profile.displayName
+                        user_name: profile.displayName
                     }
                     return cb(null, user);
                 })
             });
         } else {
-            let sql = `SELECT * FROM users WHERE id=?`
-            pool.query(sql, [result[0].userId], (err, user) => {
+            let sql = `SELECT * FROM user WHERE id=?`;
+            pool.query(sql, [result[0].user_id], (err, user) => {
                 if (err) throw err;
                 if (!user[0]) return cb(null, false);
                 return cb(null, user[0]);
