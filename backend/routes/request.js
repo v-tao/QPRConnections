@@ -32,13 +32,11 @@ router.get("/received", f(async (req, res) => {
 }));
 
 ////////// DELETE REQUEST //////////
-router.delete("/:id/delete", requestMiddleware.requestExists, requestMiddleware.sentRequest, (req, res) => {
+router.delete("/:id/delete", requestMiddleware.requestExists, requestMiddleware.sentRequest, f(async (req, res) => {
     let sql = `DELETE FROM user_request WHERE id=?`
-    pool.query(sql, [req.params.id], (err, request) => {
-        if (err) throw err;
-        res.send("Request successfully deleted.");
-    });
-});
+    await pool.query(sql, [req.params.id]);
+    res.send("Request successfully deleted.");
+}));
 
 ////////// ACCEPT REQUEST (match) //////////
 router.post("/:id/accept", requestMiddleware.requestExists, requestMiddleware.receivedRequest, f(async (req, res) => {

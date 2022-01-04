@@ -1,5 +1,17 @@
 const pool = require("../pool");
 const Errors = require("../error");
+const f = require("./index").asyncWrapper;
+
+// determines if the request exists
+const requestExists = f(async function (req, res, next) {
+    let sql = `SELECT * FROM user WHERE id=?`
+    let [request] = await pool.query(sql, [req.params.id]);
+    if (request.length == 0) {
+        throw new Errors.NotFound("Request");
+    } else {
+        next();
+    }
+});
 
 // determines if the current user sent the request
 const sentRequest = (req, res, next) => {
@@ -27,4 +39,8 @@ const receivedRequest = (req, res, next) => {
     });
 }
 
-module.exports = {sentRequest, receivedRequest};
+module.exports = {
+    requestExists: requestExists,
+    sentRequest: sentRequest, 
+    receivedRequest: receivedRequest
+}
