@@ -1,17 +1,23 @@
 const express = require("express"),
     router = express.Router();
 const pool = require("../pool");
+const Errors = require("../error");
 const {isLoggedIn, isAuthorized} = require("../middleware/index");
 
 router.use(isLoggedIn);
 
 ////////// GET USER //////////
-router.get("/:id", (req, res) => {
+router.get("/:id", async (req, res, next) => {
     let sql = `SELECT * FROM user WHERE id=?`
-    pool.query(sql, [req.params.id], (err, user) => {
-        if(err) throw err;
+    try {
+        let [user] = await pool.query(sql, [req.params.id]);
+        if (user.length == 0) {
+            throw new Errors.NotFound("User");
+        }
         res.json(user);
-    });
+    } catch (err) {
+        next(err);
+    }
 })
 
 ////////// REQUEST USER //////////
