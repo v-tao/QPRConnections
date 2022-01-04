@@ -8,7 +8,6 @@ const indexRoutes = require("./routes/index"),
     
 const app = express();
 const pool = require("./pool");
-const { createPoolCluster } = require("mysql");
 require("dotenv").config();
 app.use(express.json());
 app.set('trust proxy', 1);
