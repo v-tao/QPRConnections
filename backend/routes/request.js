@@ -2,10 +2,10 @@ const express = require("express"),
     router = express.Router();
 
 const pool = require("../pool");
-const {isLoggedIn, isAuthenticated} = require("../middleware/index");
+const indexMiddleware = require("../middleware/index");
 const {sentRequest, receivedRequest} = require("../middleware/request");
 
-router.use(isLoggedIn);
+router.use(indexMiddleware.isLoggedIn);
 
 ////////// GET REQUESTS SENT //////////
 router.get("/sent", (req, res) => {

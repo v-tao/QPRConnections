@@ -2,35 +2,28 @@ const express = require("express"),
     router = express.Router();
 const pool = require("../pool");
 const Errors = require("../error");
-const {isLoggedIn, isAuthorized} = require("../middleware/index");
+const indexMiddleware = require("../middleware/index"),
+    f = indexMiddleware.asyncWrapper;
+const {userExists} = require("../middleware/user");
 
-router.use(isLoggedIn);
+router.use(indexMiddleware.isLoggedIn);
 
 ////////// GET USER //////////
-router.get("/:id", async (req, res, next) => {
+router.get("/:id", userExists, f(async (req, res, next) => {
     let sql = `SELECT * FROM user WHERE id=?`
-    try {
-        let [user] = await pool.query(sql, [req.params.id]);
-        if (user.length == 0) {
-            throw new Errors.NotFound("User");
-        }
-        res.json(user);
-    } catch (err) {
-        next(err);
-    }
-})
+    let [user] = await pool.query(sql, [req.params.id]);
+    res.json(user[0]);
+}));
 
 ////////// REQUEST USER //////////
-router.post("/:id/request", (req, res) => {
+router.post("/:id/request", userExists, f(async (req, res) => {
     let sql = `INSERT INTO user_request (user_id, requested_user_id) VALUES(?, ?)`
-    pool.query(sql, [req.user[0].id, req.params.id], (err, user) => {
-        if (err) throw err;
-        res.send("Request successfully sent.");
-    })
-})
+    await pool.query(sql, [req.user[0].id, req.params.id]);
+    res.send("Request successfully sent.")
+}));
 
 ////////// UPDATE USER //////////
-router.put("/:id", isAuthorized, (req, res) => {
+router.put("/:id", indexMiddleware.isAuthorized, userExists, f(async (req, res) => {
     let sql = `
     UPDATE user
     SET
@@ -56,21 +49,15 @@ router.put("/:id", isAuthorized, (req, res) => {
         req.params.id,
         req.params.id
     ]
-    pool.query(sql, queryValues, (err, user) => {
-        if (err) throw err;
-        res.redirect(`/users/${req.params.id}`);
-    })
-});
+    await pool.query(sql, queryValues);
+    res.redirect(`/users/${req.params.id}`);
+}));
 
 ////////// DELETE USER //////////
-router.delete("/:id/delete", isAuthorized, (req, res) => {
-    let sql = `
-    DELETE FROM user WHERE id=?;
-    DELETE FROM credential WHERE user_id=?`;
-    pool.query(sql, [req.params.id, req.params.id], (err, user) => {
-        if (err) throw err;
-        res.send("Account succesfully deleted.");
-    })
-})
+router.delete("/:id/delete", indexMiddleware.isAuthorized, userExists, f(async (req, res) => {
+    let sql = `DELETE FROM user WHERE id=?;`
+    await pool.query(sql, [req.params.id]);
+    res.send("Account successfully deleted.")
+}));
 
 module.exports = router;

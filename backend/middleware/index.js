@@ -1,5 +1,9 @@
 const Errors = require("../error");
 
+const asyncWrapper = (cb) => {
+    return (req, res, next) => cb(req, res, next).catch(next);
+}
+
 const isLoggedIn = (req, res, next) => {
     if (req.user) {
         next();
@@ -16,4 +20,8 @@ const isAuthorized = (req, res, next) => {
     }
 }
 
-module.exports = {isLoggedIn, isAuthorized};
+module.exports = {
+    asyncWrapper: asyncWrapper,
+    isLoggedIn: isLoggedIn, 
+    isAuthorized: isAuthorized,
+}
