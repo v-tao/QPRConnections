@@ -1,13 +1,23 @@
 const express = require("express"),
     session = require("express-session"),
     passport = require("passport"),
+    mysql = require("mysql2"),
     GoogleStrategy = require("passport-google-oidc");
 const indexRoutes = require("./routes/index"),
     userRoutes = require("./routes/user"),
     requestRoutes = require("./routes/request");
     
 const app = express();
-const pool = require("./pool");
+const Errors = require("./error");
+
+const con = mysql.createConnection({
+    host: "localhost",
+    user: "root",
+    password: process.env.MYSQL_PASSWORD,
+    database: "QPRConnections",
+    multipleStatements: true,
+});
+
 require("dotenv").config();
 app.use(express.json());
 app.set('trust proxy', 1);
@@ -25,8 +35,8 @@ passport.serializeUser((user, done) => {
   });
   
 passport.deserializeUser((id, done) => {
-    let sql = `SELECT * FROM user WHERE id=${id}`;
-    pool.query(sql, (err, user) => {
+    let sql = `SELECT * FROM user WHERE id=${id}`
+    con.query(sql, (err, user) => {
         done(err, user);
     });
 });
@@ -37,11 +47,11 @@ passport.use(new GoogleStrategy({
     callbackURL: "http://localhost:3000/oauth2/redirect/google"
 }, (issuer, profile, cb) => {
     let sql = `SELECT * FROM credential WHERE provider=? AND subject=?`;
-    pool.query(sql, [issuer, profile.id], (err, result) => {
+    con.query(sql, [issuer, profile.id], (err, result) => {
         if (err) throw err;
         if (result.length==0) {
             let sql = `INSERT INTO user (user_name) VALUES(?)`;
-            pool.query(sql, [profile.displayName], (err, result) => {
+            con.query(sql, [profile.displayName], (err, result) => {
                 let id = result.insertId
                 if (err) throw err;
                 let sql = `INSERT INTO credential SET ?`;
@@ -50,7 +60,7 @@ passport.use(new GoogleStrategy({
                     provider: issuer,
                     subject: profile.id.toString()
                 }
-                pool.query(sql, credential, (err, result) => {
+                con.query(sql, credential, (err, result) => {
                     if(err) throw err;
                     let user = {
                         id: id,
@@ -61,7 +71,7 @@ passport.use(new GoogleStrategy({
             });
         } else {
             let sql = `SELECT * FROM user WHERE id=?`;
-            pool.query(sql, [result[0].user_id], (err, user) => {
+            con.query(sql, [result[0].user_id], (err, user) => {
                 if (err) throw err;
                 if (!user[0]) return cb(null, false);
                 return cb(null, user[0]);
